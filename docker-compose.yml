@@ -1,0 +1,32 @@
+# Based on https://github.com/gbalke/docker-ros2-opengl
+
+version: '2.17.2'
+
+services:
+
+  smap-desktop-rviz:
+    user: "ros"
+    network_mode: "host"
+    image: lucyannofrota/smap:desktop-deploy
+    container_name: smap-desktop-rviz
+    privileged: true
+    environment:
+      - "DISPLAY"
+      - "QT_X11_NO_MITSHM=1" #fix some QT bugs
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+      - /tmp/.X11-unix:/tmp/.X11-unix # Share X11 socket with container
+      - $HOME/.Xauthority:/home/ros/.Xauthority # Share X11 permissions
+    cap_add:
+      - SYS_PTRACE
+    deploy:
+      resources:
+        reservations:
+          devices:
+            - driver: nvidia
+              capabilities: [gpu]
+    command: >
+      bash -c 
+      "
+        ros2 launch smap_node smap_rviz_launch.py
+      "
