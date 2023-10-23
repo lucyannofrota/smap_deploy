@@ -114,7 +114,7 @@ services:
       - ./results/timers/topo_map:/workspace/src/smap/smap_core/timers/topo_map
       - ./results/vals/object_estimator:/workspace/src/smap/smap_core/vals/object_estimator
       - ./results/maps:/workspace/src/smap/smap_core/maps
-      - ./results/maps/g_map:/workspace/src/smap/smap_core/maps/g_map
+      - ./results/maps/g_smap:/workspace/src/smap/smap_core/maps/g_smap
     deploy:
       resources:
         reservations:
