@@ -94,6 +94,39 @@ services:
         . install/setup.bash && ros2 launch smap_node smap_launch.py
       "
 
+  smap-env:
+    network_mode: "host"
+    image: lucyannofrota/smap:jetson-deploy-latest
+    container_name: smap-env
+    privileged: true
+    depends_on:
+      - p3dx
+      - p3dx-navigation
+    environment:
+      - "DISPLAY"
+      - "QT_X11_NO_MITSHM=1" #fix some QT bugs
+      - "ROS_DOMAIN_ID=5"
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+      - /tmp/.X11-unix:/tmp/.X11-unix # Share X11 socket with container
+      - $HOME/.Xauthority:/home/ros/.Xauthority # Share X11 permissions
+      - ./results/timers/object_estimator:/workspace/src/smap/smap_core/timers/object_estimator
+      - ./results/timers/topo_map:/workspace/src/smap/smap_core/timers/topo_map
+      - ./results/vals/object_estimator:/workspace/src/smap/smap_core/vals/object_estimator
+      - ./results/maps:/workspace/src/smap/smap_core/maps
+      - ./results/maps/g_maps:/workspace/src/smap/smap_core/maps/g_maps
+    deploy:
+      resources:
+        reservations:
+          devices:
+            - driver: nvidia
+              capabilities: [gpu]
+    restart: unless-stopped
+    command: >
+      bash -c "
+        tail -f /dev/null
+      "
+
   smap-yolov5:
     network_mode: "host"
     image: lucyannofrota/smap:jetson-yolov5
@@ -106,6 +139,8 @@ services:
       - "ROS_DOMAIN_ID=5"
     cap_add:
       - SYS_PTRACE
+    volumes:
+      - ./results/timers/yolo_v5:/workspace/timers/yolo_v5
     deploy:
       resources:
         reservations:
@@ -130,6 +165,8 @@ services:
       - "ROS_DOMAIN_ID=5"
     cap_add:
       - SYS_PTRACE
+    volumes:
+      - ./results/timers/yolo_v5_even:/workspace/timers/yolo_v5_even
     deploy:
       resources:
         reservations:
@@ -154,6 +191,8 @@ services:
       - "ROS_DOMAIN_ID=5"
     cap_add:
       - SYS_PTRACE
+    volumes:
+      - ./results/timers/yolo_v5_odd:/workspace/timers/yolo_v5_odd
     deploy:
       resources:
         reservations:
